@@ -5,13 +5,14 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "POST only" });
   }
 
-  const { names } = req.body;
-
+  const { names } = req.body || {};
   if (!names || !Array.isArray(names)) {
     return res.status(400).json({ error: "Send names array" });
   }
 
-  const headers = { "User-Agent": "Mozilla/5.0" };
+  const headers = {
+    "User-Agent": "Mozilla/5.0"
+  };
 
   async function exists(url) {
     try {
@@ -28,9 +29,9 @@ export default async function handler(req, res) {
       instagram: await exists(`https://www.instagram.com/${name}/`),
       youtube: await exists(`https://www.youtube.com/@${name}`),
       x: await exists(`https://x.com/${name}`),
-      linkedin: await exists(`https://www.linkedin.com/in/${name}/`),
+      linkedin: await exists(`https://www.linkedin.com/in/${name}/`)
     }))
   );
 
-  res.status(200).json({ results });
+  return res.status(200).json({ results });
 }

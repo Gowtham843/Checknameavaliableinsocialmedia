@@ -8,7 +8,19 @@
   },
   "dependencies": {
     "express": "^5.2.1",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^2.7.0"
   },
-  "type": "module"
+  "type": "module",
+  "description": "Frontend: HTML upload + result table  \r Backend: JavaScript serverless API",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gowtham843/Check-names-avaliable-in-social-media.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Gowtham843/Check-names-avaliable-in-social-media/issues"
+  },
+  "homepage": "https://github.com/Gowtham843/Check-names-avaliable-in-social-media#readme"
 }
