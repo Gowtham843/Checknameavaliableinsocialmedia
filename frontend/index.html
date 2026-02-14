@@ -1,54 +1,203 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Social Handle Checker</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #888; padding: 6px; }
-    th { background: #eee; }
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background: #fafafa;
+      color: #222;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+    p {
+      text-align: center;
+      color: #555;
+    }
+
+    .section {
+      margin: 20px 0;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input, select, button {
+      margin-top: 6px;
+      margin-bottom: 12px;
+      padding: 8px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    button {
+      cursor: pointer;
+      background: #007bff;
+      color: #fff;
+      font-weight: bold;
+      transition: .3s;
+    }
+    button:hover {
+      background: #0056d2;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 12px;
+      margin: 10px 0;
+    }
+    .radio-group input {
+      width: auto;
+    }
+
+    #panelNames {
+      display: none;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background: #eee;
+    }
     .true { color: green; }
     .false { color: red; }
+
+    .filters {
+      margin-top: 14px;
+      text-align: right;
+    }
   </style>
 </head>
 <body>
 
-<h1>Handle Availability Checker</h1>
+<h1>Social Handle Availability Checker</h1>
+<p>Upload names or enter manually → select platforms → get results.</p>
 
-<input type="file" id="fileInput" accept=".txt,.csv,.xlsx" />
-<button onclick="process()">Check</button>
+<div class="section">
+  <label>Select Input Type</label>
+  <select id="inputType" onchange="onInputTypeChange()">
+    <option value="">-- Select --</option>
+    <option value="txt">TXT (one name per line)</option>
+    <option value="excel">Excel (.xlsx)</option>
+    <option value="panel">Manual Entry Panel</option>
+  </select>
+
+  <div id="fileUpload">
+    <input type="file" id="fileInput" />
+    <p id="txtHint" style="display:none;">Format: one name per line (TXT)</p>
+    <p id="excelHint" style="display:none;">Upload an Excel (.xlsx) file. Names in first column.</p>
+  </div>
+
+  <div id="panelNames">
+    <label>Enter Names (one per line)</label>
+    <textarea id="textList" rows="6" style="width:100%;"></textarea>
+  </div>
+
+  <div class="section">
+    <label>Select Platforms to Check</label>
+    <div class="radio-group">
+      <div><input type="checkbox" class="platform" value="instagram" checked> Instagram</div>
+      <div><input type="checkbox" class="platform" value="youtube" checked> YouTube</div>
+      <div><input type="checkbox" class="platform" value="x" checked> X (Twitter)</div>
+      <div><input type="checkbox" class="platform" value="linkedin" checked> LinkedIn</div>
+    </div>
+  </div>
+
+  <button onclick="process()">Check Handles</button>
+</div>
+
+
+<div class="filters">
+  <label>Show:</label>
+  <select id="filterSelect" onchange="applyFilter()">
+    <option value="all">All results</option>
+    <option value="available-any">Available on any</option>
+    <option value="instagram-only">Only Instagram available</option>
+    <option value="youtube-only">Only YouTube available</option>
+    <option value="x-only">Only X available</option>
+    <option value="linkedin-only">Only LinkedIn available</option>
+  </select>
+</div>
 
 <div id="output"></div>
 
 <script>
+function onInputTypeChange() {
+  const type = document.getElementById("inputType").value;
+  document.getElementById("fileUpload").style.display = (type === "txt" || type === "excel") ? "block" : "none";
+  document.getElementById("panelNames").style.display = (type === "panel") ? "block" : "none";
+
+  document.getElementById("txtHint").style.display = type === "txt" ? "block" : "none";
+  document.getElementById("excelHint").style.display = type === "excel" ? "block" : "none";
+}
+
 async function process() {
-  const file = document.getElementById("fileInput").files[0];
-  if (!file) return alert("Upload a file first");
+  let names = [];
 
-  let text = await file.text();
-  // Simple split for .txt / .csv
-  let names = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  const type = document.getElementById("inputType").value;
+  if (!type) return alert("Select input type first!");
 
-  const res = await fetch("/api/check", {
+  if (type === "txt") {
+    const file = document.getElementById("fileInput").files[0];
+    if (!file) return alert("Upload a TXT file!");
+    const text = await file.text();
+    names = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  }
+  else if (type === "panel") {
+    const text = document.getElementById("textList").value;
+    names = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  }
+  else if (type === "excel") {
+    return alert("Excel support coming next! For now use TXT or Panel.");
+  }
+
+  if (!names.length) return alert("Add at least one name!");
+
+  // get selected platforms
+  const platforms = [];
+  document.querySelectorAll(".platform:checked").forEach(el=> platforms.push(el.value));
+  if (!platforms.length) return alert("Select at least one platform!");
+
+  const res = await fetch("https://<your-vercel-app>.vercel.app/api/check", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ names }),
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ names })
   });
 
   const data = await res.json();
+  window.latestResults = data.results;
   showTable(data.results);
 }
 
+
 function showTable(data) {
-  let html = `
-    <table>
-      <tr>
-        <th>Name</th>
-        <th>Instagram</th>
-        <th>YouTube</th>
-        <th>X</th>
-        <th>LinkedIn</th>
-      </tr>`;
+  let html = `<table id="resultTable">
+    <tr>
+      <th>Name</th>
+      <th>Instagram</th>
+      <th>YouTube</th>
+      <th>X (Twitter)</th>
+      <th>LinkedIn</th>
+    </tr>`;
+
   data.forEach(r => {
     html += `
       <tr>
@@ -57,10 +206,26 @@ function showTable(data) {
         <td class="${r.youtube}">${r.youtube}</td>
         <td class="${r.x}">${r.x}</td>
         <td class="${r.linkedin}">${r.linkedin}</td>
-      </tr>`;
+      </tr>
+    `;
   });
-  html += `</table>`;
+
+  html += "</table>";
   document.getElementById("output").innerHTML = html;
+}
+
+function applyFilter() {
+  const filter = document.getElementById("filterSelect").value;
+  const filtered = window.latestResults.filter(r => {
+    if (filter === "all") return true;
+    if (filter === "available-any") return (r.instagram || r.youtube || r.x || r.linkedin);
+    if (filter === "instagram-only") return r.instagram && !r.youtube && !r.x && !r.linkedin;
+    if (filter === "youtube-only") return r.youtube && !r.instagram && !r.x && !r.linkedin;
+    if (filter === "x-only") return r.x && !r.instagram && !r.youtube && !r.linkedin;
+    if (filter === "linkedin-only") return r.linkedin && !r.instagram && !r.youtube && !r.x;
+    return true;
+  });
+  showTable(filtered);
 }
 </script>
 
