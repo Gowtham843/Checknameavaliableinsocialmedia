@@ -37,7 +37,6 @@ Thinkbit
 Codezeno`;
 }
 
-if (inputType.value === "excel") {
   preview.innerHTML = `
 <table style="width:100%;border-collapse:collapse">
 <tr><th style="border:1px solid #555;padding:4px">Name</th></tr>
@@ -48,7 +47,7 @@ if (inputType.value === "excel") {
 </table>`;
 }
 
-});
+);
 
 submitBtn.addEventListener("click", checkHandles);
 
