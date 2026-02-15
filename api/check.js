@@ -40,7 +40,7 @@ export default async function handler(req, res) {
       // For Instagram, check the response body
       if (platform === 'instagram') {
         const text = await response.text();
-        
+        console.log(text)
         // Remove all HTML tags and extra spaces for clean text matching
         const cleanText = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').toLowerCase();
         
