@@ -3,149 +3,263 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Social Handle Checker</title>
-
-  <style>
-    body {
-      font-family: Segoe UI, Arial;
-      background: #fafafa;
-      padding: 20px;
-    }
-
-    .section {
-      background: #fff;
-      padding: 16px;
-      border-radius: 8px;
-      margin: 18px 0;
-      border: 1px solid #ddd;
-    }
-
-    input,
-    select,
-    textarea,
-    button {
-      width: 100%;
-      padding: 8px;
-      margin: 6px 0 12px;
-    }
-
-    button {
-      background: #176be0;
-      color: white;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      opacity: .6
-    }
-
-    .radio-group {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .platform-item {
-      display: flex;
-      gap: 6px;
-      cursor: pointer;
-    }
-
-    .format-preview {
-      background: #0f1724;
-      color: #e6f0ff;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 13px;
-    }
-
-    .loader {
-      display: none;
-      width: 28px;
-      height: 28px;
-      border: 4px solid #ddd;
-      border-top: 4px solid #176be0;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: auto;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg)
-      }
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-    }
-
-    th,
-    td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-
-    .true {
-      color: green;
-      font-weight: bold
-    }
-
-    .false {
-      color: red;
-      font-weight: bold
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
-  <h1>Social Handle Availability Checker</h1>
-
-  <div class="section">
-
-    <select id="inputType">
-      <option value="">Select Input</option>
-      <option value="txt">TXT File</option>
-      <option value="csv">CSV File</option>
-      <option value="excel">Excel (.xlsx)</option>
-      <option value="panel">Manual Entry</option>
-    </select>
-
-
-    <div id="fileBox" style="display:none;">
-      <input type="file" id="fileInput" accept=".txt,.csv,.xlsx">
-      <div id="preview" class="format-preview"></div>
-    </div>
-
-    <div id="panelBox" style="display:none;">
-      <textarea id="textInput" rows="6"></textarea>
-    </div>
-
-    <div class="radio-group">
-      <label class="platform-item"><input type="checkbox" value="instagram" checked>Instagram</label>
-      <label class="platform-item"><input type="checkbox" value="youtube" checked>YouTube</label>
-      <label class="platform-item"><input type="checkbox" value="x" checked>X</label>
-      <label class="platform-item"><input type="checkbox" value="linkedin" checked>LinkedIn</label>
-    </div>
-
-    <button id="submitBtn">Check Handles</button>
-    <div class="loader" id="loader"></div>
-
+  <div class="topbar">
+    <div class="brand">Handle Checker</div>
+    <div class="tag">Check username availability across platforms</div>
   </div>
 
-  <div class="section" id="resultSection" style="display:none;">
-    <div id="resultTable"></div>
+  <div class="container">
+    <div class="panel">
+      <h1>Social Handle Availability Checker</h1>
+      <p class="desc">Check if usernames are available on Instagram, YouTube, X, and LinkedIn</p>
+
+      <div class="card">
+        <label>Input Type</label>
+        <select id="inputType">
+          <option value="">Select Input Method</option>
+          <option value="txt">TXT File</option>
+          <option value="csv">CSV File</option>
+          <option value="excel">Excel (.xlsx)</option>
+          <option value="panel">Manual Entry</option>
+        </select>
+
+        <div id="fileBox" style="display:none;">
+          <label>Upload File</label>
+          <input type="file" id="fileInput" accept=".txt,.csv,.xlsx">
+          <div class="file-controls">
+            <p class="hint">Format preview:</p>
+            <div id="preview" class="format-preview"></div>
+          </div>
+        </div>
+
+        <div id="panelBox" style="display:none;">
+          <label>Enter Names (one per line)</label>
+          <textarea id="textInput" rows="6" placeholder="codexly&#10;logiqo&#10;thinkbit"></textarea>
+        </div>
+
+        <label style="margin-top:16px">Select Platforms</label>
+        <div class="radio-group">
+          <label class="platform-item">
+            <input type="checkbox" value="instagram" checked>
+            <span>Instagram</span>
+          </label>
+          <label class="platform-item">
+            <input type="checkbox" value="youtube" checked>
+            <span>YouTube</span>
+          </label>
+          <label class="platform-item">
+            <input type="checkbox" value="x" checked>
+            <span>X</span>
+          </label>
+          <label class="platform-item">
+            <input type="checkbox" value="linkedin" checked>
+            <span>LinkedIn</span>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="submitBtn" class="btn primary">Check Availability</button>
+          <div class="loader" id="loader"></div>
+        </div>
+      </div>
+
+      <div class="card" id="resultSection" style="display:none; margin-top:20px;">
+        <h2 style="margin-top:0">Results</h2>
+        <div class="table-wrap">
+          <div id="resultTable"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    Social Handle Checker &copy; 2026
   </div>
 
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-  <script src="script.js"></script>
+  
+  <script>
+    const inputType = document.getElementById("inputType");
+    const fileBox = document.getElementById("fileBox");
+    const panelBox = document.getElementById("panelBox");
+    const fileInput = document.getElementById("fileInput");
+    const textInput = document.getElementById("textInput");
+    const submitBtn = document.getElementById("submitBtn");
+    const loader = document.getElementById("loader");
+    const preview = document.getElementById("preview");
+    const resultSection = document.getElementById("resultSection");
+    const resultTable = document.getElementById("resultTable");
 
+    let running = false;
+
+    inputType.addEventListener("change", () => {
+
+      fileBox.style.display =
+        ["txt","csv","excel"].includes(inputType.value) ? "block" : "none";
+
+      panelBox.style.display =
+        inputType.value === "panel" ? "block" : "none";
+
+      // TXT preview
+      if (inputType.value === "txt") {
+        preview.textContent =
+`Codexly
+Logiqo
+Thinkbit
+Codezeno`;
+      }
+
+      // CSV preview
+      else if (inputType.value === "csv") {
+        preview.textContent =
+`name
+Codexly
+Logiqo
+Thinkbit
+Codezeno`;
+      }
+
+      // Excel preview
+      else if (inputType.value === "excel") {
+        preview.innerHTML = `
+<table style="width:100%;border-collapse:collapse">
+<tr><th style="border:1px solid #555;padding:4px">Name</th></tr>
+<tr><td style="border:1px solid #555;padding:4px">Codexly</td></tr>
+<tr><td style="border:1px solid #555;padding:4px">Logiqo</td></tr>
+<tr><td style="border:1px solid #555;padding:4px">Thinkbit</td></tr>
+<tr><td style="border:1px solid #555;padding:4px">Codezeno</td></tr>
+</table>`;
+      }
+
+      else {
+        preview.innerHTML = "";
+      }
+    });
+
+    submitBtn.addEventListener("click", checkHandles);
+
+    async function checkHandles() {
+      if (running) return;
+      running = true;
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+      loader.style.display = "block";
+
+      try {
+        const names = await collectNames();
+        if (!names.length) {
+          reset("No names found");
+          return;
+        }
+
+        const platforms = [...document.querySelectorAll(".platform-item input:checked")]
+          .map(p => p.value);
+        
+        if (!platforms.length) {
+          reset("Select at least one platform");
+          return;
+        }
+
+        const res = await fetch("/api/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ names })
+        });
+
+        if (!res.ok) {
+          throw new Error(`Server error: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        buildTable(data.results, platforms);
+
+        resultSection.style.display = "block";
+        resultSection.scrollIntoView({ behavior: "smooth" });
+
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+
+      reset();
+    }
+
+    async function collectNames() {
+
+      if (inputType.value === "panel") {
+        return textInput.value.split(/\r?\n/).filter(n => n.trim());
+      }
+
+      const file = fileInput.files[0];
+      if (!file) throw new Error("Please upload a file");
+
+      if (inputType.value === "txt") {
+        const txt = await file.text();
+        return txt.split(/\r?\n/).filter(n => n.trim());
+      }
+
+      if (inputType.value === "csv") {
+        const txt = await file.text();
+        const lines = txt.split(/\r?\n/).filter(n => n.trim());
+        // Skip header if first line looks like a header
+        const start = lines[0] && lines[0].toLowerCase().includes('name') ? 1 : 0;
+        return lines.slice(start).map(r => r.split(",")[0]).filter(n => n.trim());
+      }
+
+      if (inputType.value === "excel") {
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        // Skip header row (first row)
+        return json.slice(1).map(row => row[0]).filter(n => n);
+      }
+
+      return [];
+    }
+
+    function reset(msg) {
+      if (msg) alert(msg);
+      loader.style.display = "none";
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('loading');
+      running = false;
+    }
+
+    function buildTable(data, platforms) {
+
+      let html = "<table><tr><th>Name</th>";
+
+      platforms.forEach(p => {
+        const displayName = p.charAt(0).toUpperCase() + p.slice(1);
+        html += `<th>${displayName}</th>`;
+      });
+
+      html += "</tr>";
+
+      data.forEach(row => {
+        html += `<tr><td>${row.name}</td>`;
+        platforms.forEach(p => {
+          const available = row[p];
+          html += `<td class="status-${available ? "true" : "false"}">${available ? "✓ Available" : "✗ Taken"}</td>`;
+        });
+        html += "</tr>";
+      });
+
+      html += "</table>";
+
+      resultTable.innerHTML = html;
+    }
+  </script>
 
 </body>
 
