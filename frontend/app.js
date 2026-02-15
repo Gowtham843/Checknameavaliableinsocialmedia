@@ -134,6 +134,10 @@
     const platforms = getSelectedPlatforms();
     renderTable(filtered, platforms.length ? platforms : ['instagram','youtube','x','linkedin']);
   });
+  function capitalize(word) {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
 
   // main check handler
   checkBtn.addEventListener('click', async () => {
