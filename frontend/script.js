@@ -12,32 +12,35 @@ const resultTable = document.getElementById("resultTable");
 let running = false;
 
 inputType.addEventListener("change", () => {
+
   fileBox.style.display =
-    (inputType.value === "txt" ||
-     inputType.value === "csv" ||
-     inputType.value === "excel") ? "block" : "none";
+    ["txt","csv","excel"].includes(inputType.value) ? "block" : "none";
 
   panelBox.style.display =
     inputType.value === "panel" ? "block" : "none";
 
+  // TXT preview
   if (inputType.value === "txt") {
-  preview.textContent =
+    preview.textContent =
 `Codexly
 Logiqo
 Thinkbit
 Codezeno`;
-}
+  }
 
-if (inputType.value === "csv") {
-  preview.textContent =
+  // CSV preview
+  else if (inputType.value === "csv") {
+    preview.textContent =
 `name
 Codexly
 Logiqo
 Thinkbit
 Codezeno`;
-}
+  }
 
-  preview.innerHTML = `
+  // Excel preview
+  else if (inputType.value === "excel") {
+    preview.innerHTML = `
 <table style="width:100%;border-collapse:collapse">
 <tr><th style="border:1px solid #555;padding:4px">Name</th></tr>
 <tr><td style="border:1px solid #555;padding:4px">Codexly</td></tr>
@@ -45,9 +48,12 @@ Codezeno`;
 <tr><td style="border:1px solid #555;padding:4px">Thinkbit</td></tr>
 <tr><td style="border:1px solid #555;padding:4px">Codezeno</td></tr>
 </table>`;
-}
+  }
 
-);
+  else {
+    preview.innerHTML = "";
+  }
+});
 
 submitBtn.addEventListener("click", checkHandles);
 
@@ -59,7 +65,7 @@ async function checkHandles() {
   loader.style.display = "block";
 
   try {
-    let names = await collectNames();
+    const names = await collectNames();
     if (!names.length) return reset("No names found");
 
     const platforms = [...document.querySelectorAll(".platform-item input:checked")]
@@ -86,6 +92,7 @@ async function checkHandles() {
 }
 
 async function collectNames() {
+
   if (inputType.value === "panel") {
     return textInput.value.split(/\r?\n/).filter(n => n.trim());
   }
@@ -122,8 +129,11 @@ function reset(msg) {
 }
 
 function buildTable(data, platforms) {
+
   let html = "<table><tr><th>Name</th>";
+
   platforms.forEach(p => html += `<th>${p}</th>`);
+
   html += "</tr>";
 
   data.forEach(row => {
@@ -135,5 +145,6 @@ function buildTable(data, platforms) {
   });
 
   html += "</table>";
+
   resultTable.innerHTML = html;
 }
