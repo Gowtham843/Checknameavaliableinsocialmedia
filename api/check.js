@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
   };
 
-  async function checkExists(url) {
+  async function checkAvailable(url) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -36,8 +36,12 @@ export default async function handler(req, res) {
       });
       
       clearTimeout(timeoutId);
-      return response.status === 200;
+      
+      // If status is 404, username is AVAILABLE
+      // If status is 200, username is TAKEN
+      return response.status === 404 || response.status === 410;
     } catch (error) {
+      // On error (timeout, network), assume taken to be safe
       return false;
     }
   }
@@ -49,10 +53,10 @@ export default async function handler(req, res) {
         
         return {
           name: name.trim(),
-          instagram: await checkExists(`https://www.instagram.com/${cleanName}/`),
-          youtube: await checkExists(`https://www.youtube.com/@${cleanName}`),
-          x: await checkExists(`https://x.com/${cleanName}`),
-          linkedin: await checkExists(`https://www.linkedin.com/in/${cleanName}/`)
+          instagram: await checkAvailable(`https://www.instagram.com/${cleanName}/`),
+          youtube: await checkAvailable(`https://www.youtube.com/@${cleanName}`),
+          x: await checkAvailable(`https://x.com/${cleanName}`),
+          linkedin: await checkAvailable(`https://www.linkedin.com/in/${cleanName}/`)
         };
       })
     );
